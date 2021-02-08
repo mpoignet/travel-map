@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css">
+
+    <!-- Leaflet contextmenu -->
+    <link rel="stylesheet" href="../node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.css">
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/410f366e5b.js" crossorigin="anonymous"></script>
+
+    <!-- Load project's scripts -->
+    <script src="main.js"></script>
+
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="panel">
+        <div class="search-line">
+          <input type="text" id="search-input" class="panel-input" list="suggestions">
+          <datalist id="suggestions"></datalist>
+          <button id="search-btn" class="panel-btn panel-btn--icon"><i class="fas fa-search"></i></button>
+          <button id="route-btn" class="panel-btn panel-btn--icon"><i class="fas fa-directions"></i></button>
+        </div> 
+        <button id="clear-btn" class="panel-btn panel-btn--standalone">Clear map</button>
+    </div>
+    <div id="map"></div>
+    </div>
+    
+    
+  </body>
+</html>

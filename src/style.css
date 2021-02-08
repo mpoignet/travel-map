@@ -1,0 +1,48 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: 12pt;
+}
+#wrapper {
+    display: flex;
+}
+#map {
+  /* configure the size of the map */
+  width: 1000px;
+  height: 600px;
+}
+#panel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+.search-line {
+  width: 100%;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+}
+.panel-input {
+  height: 30px;
+  width: 100%;
+  margin: 10px;
+  font-size: 12pt;
+}
+.panel-btn {
+  height: 30px; 
+}
+.panel-btn--icon {
+  width: 30px;
+  margin: 10px 10px 10px 0;
+}
+.panel-btn--standalone {
+  margin: 10px;
+  align-self: flex-end;
+}

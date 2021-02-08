@@ -1,0 +1,27 @@
+{
+  "name": "travelMap",
+  "version": "0.1",
+  "description": " A map that displays your travels",
+  "private": true,
+  "dependencies": {
+    "leaflet": "^1.7.1",
+    "leaflet-contextmenu": "^1.4.0",
+    "openrouteservice-js": "^0.1.16"
+  },
+  "devDependencies": {
+    "css-loader": "^5.0.2",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^2.2.1",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.21.2",
+    "webpack-cli": "^4.5.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "Mathieu Poignet",
+  "license": "ISC"
+}
