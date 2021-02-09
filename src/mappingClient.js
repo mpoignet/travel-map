@@ -1,6 +1,10 @@
 import Openrouteservice from "openrouteservice-js";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import "leaflet-contextmenu";
+import "leaflet-contextmenu/dist/leaflet.contextmenu.min.css";
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
+import 'leaflet-defaulticon-compatibility';
 
 const API_TOKEN = "5b3ce3597851110001cf6248bd9653bdfbb34639abfd8b798225be02";
 const LayerType = {

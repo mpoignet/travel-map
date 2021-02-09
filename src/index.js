@@ -1,4 +1,6 @@
 import MappingClient from './mappingClient.js'
+import "normalize.css"
+import '@fortawesome/fontawesome-free/js/all.js';
 import './style.css';
 
 const SEARCH_INPUT_ID = "search-input";
