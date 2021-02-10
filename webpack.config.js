@@ -11,6 +11,24 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              ['@babel/preset-env',
+                { 
+                targets: "defaults",
+                "useBuiltIns": "usage",
+                "corejs": "3.8.3"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
@@ -23,4 +41,9 @@ module.exports = {
       },
     ],
   },
+  resolve: {
+    extensions: [
+      '.js'
+    ]
+  }
 };
