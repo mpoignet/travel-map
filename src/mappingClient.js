@@ -1,224 +1,225 @@
-import Openrouteservice from "openrouteservice-js";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-contextmenu";
-import "leaflet-contextmenu/dist/leaflet.contextmenu.min.css";
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
-import 'leaflet-defaulticon-compatibility';
+import Openrouteservice from 'openrouteservice-js'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet-contextmenu'
+import 'leaflet-contextmenu/dist/leaflet.contextmenu.min.css"'
+// Fixing leaflet webpack compatibility, see https://github.com/Leaflet/Leaflet/issues/4968
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'
+import 'leaflet-defaulticon-compatibility'
 
-const API_TOKEN = "5b3ce3597851110001cf6248bd9653bdfbb34639abfd8b798225be02";
+const API_TOKEN = '5b3ce3597851110001cf6248bd9653bdfbb34639abfd8b798225be02'
 const LayerType = {
-  MARKER: "marker",
-  ROUTE: "route",
-};
+  MARKER: 'marker',
+  ROUTE: 'route'
+}
 
 class MappingClient {
   // mapIdd: the id of the DOM element to load the map
-  constructor(mapId) {
+  constructor (mapId) {
     this.orsDirections = new Openrouteservice.Directions({
-      api_key: API_TOKEN,
-    });
+      api_key: API_TOKEN
+    })
     this.Geocode = new Openrouteservice.Geocode({
-      api_key: API_TOKEN,
-    });
-    this.orsUtil = new Openrouteservice.Util();
-    const self = this;
+      api_key: API_TOKEN
+    })
+    this.orsUtil = new Openrouteservice.Util()
+    const self = this
 
-    //Bindings
-    this.plotPointFromEvent = this.plotPointFromEvent.bind(this);
-    this.plotRouteFromEvent = this.plotRouteFromEvent.bind(this);
+    // Bindings
+    this.plotPointFromEvent = this.plotPointFromEvent.bind(this)
+    this.plotRouteFromEvent = this.plotRouteFromEvent.bind(this)
 
     // Keep track of the current stops for the route
-    this.stops = [];
+    this.stops = []
 
     // Add an autocomplete function to the SDK
     this.Geocode.autocomplete = function (reqArgs) {
       // Get custom header and remove from args
-      this.customHeaders = [];
+      this.customHeaders = []
       if (reqArgs.customHeaders) {
-        this.customHeaders = reqArgs.customHeaders;
-        delete reqArgs.customHeaders;
+        this.customHeaders = reqArgs.customHeaders
+        delete reqArgs.customHeaders
       }
-      self.orsUtil.setRequestDefaults(this.args, reqArgs);
-      reqArgs.service = "geocode/autocomplete";
-      self.orsUtil.copyProperties(reqArgs, this.args);
-      return this.geocodePromise();
-    };
+      self.orsUtil.setRequestDefaults(this.args, reqArgs)
+      reqArgs.service = 'geocode/autocomplete'
+      self.orsUtil.copyProperties(reqArgs, this.args)
+      return this.geocodePromise()
+    }
 
-    //Initialize Leaflet
+    // Initialize Leaflet
     this.map = L.map(mapId, {
       contextmenu: true,
       contextmenuWidth: 140,
       contextmenuItems: [
         {
-          text: "Add marker",
-          callback: this.plotPointFromEvent,
+          text: 'Add marker',
+          callback: this.plotPointFromEvent
         },
         {
-          text: "Add route",
-          callback: this.plotRouteFromEvent,
-        },
-      ],
-    }).setView({ lon: 0, lat: 0 }, 2);
+          text: 'Add route',
+          callback: this.plotRouteFromEvent
+        }
+      ]
+    }).setView({ lon: 0, lat: 0 }, 2)
 
     // add the OpenStreetMap tiles
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution:
-        "&copy; <a href='https://openstreetmap.org/copyright'>OpenStreetMap contributors</a>",
-    }).addTo(this.map);
+        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    }).addTo(this.map)
 
     // show the scale bar on the lower left corner
-    L.control.scale().addTo(this.map);
+    L.control.scale().addTo(this.map)
   }
 
-  addEventListener(...args) {
-    this.map.addEventListener(...args);
+  addEventListener (...args) {
+    this.map.addEventListener(...args)
   }
 
-  deleteLayer(e) {
-    console.debug("deleting layer");
-    console.debug(e);
-    this.remove();
+  deleteLayer (e) {
+    console.debug('deleting layer')
+    console.debug(e)
+    this.remove()
   }
 
-  addLayer(type, object) {
-    let layerConstructor;
+  addLayer (type, object) {
+    let layerConstructor
     switch (type) {
-      case LayerType.MARKER: layerConstructor = L.marker; break;
-      case LayerType.ROUTE: layerConstructor = L.geoJson; break;
+      case LayerType.MARKER: layerConstructor = L.marker; break
+      case LayerType.ROUTE: layerConstructor = L.geoJson; break
     }
     const layer = layerConstructor(object, {
       contextmenu: true,
       contextmenuWidth: 140,
       contextmenuItems: [
         {
-          text: "Delete",
-          callback: this.deleteLayer,
-        },
-      ],
-    });
-    layer.options.contextmenuItems[0].context = layer;
-    layer.addTo(this.map);
+          text: 'Delete',
+          callback: this.deleteLayer
+        }
+      ]
+    })
+    layer.options.contextmenuItems[0].context = layer
+    layer.addTo(this.map)
   }
 
-  plotPointFromCoordinates(coordinates) {
-    console.debug(coordinates);
+  plotPointFromCoordinates (coordinates) {
+    console.debug(coordinates)
     this.addLayer(LayerType.MARKER, {
       lon: coordinates.lng,
-      lat: coordinates.lat,
-    });
+      lat: coordinates.lat
+    })
   }
 
-  plotPointFromEvent(e) {
-    console.debug("adding marker from contextmenu");
-    this.plotPointFromCoordinates(e.latlng);
+  plotPointFromEvent (e) {
+    console.debug('adding marker from contextmenu')
+    this.plotPointFromCoordinates(e.latlng)
   }
 
-  plotRouteFromEvent(e) {
-    console.debug("adding route from contextmenu");
-    this.plotPointFromCoordinates(e.latlng);
-    this.stops.push(e.latlng);
-    if (this.stops.length == 2) {
-      this.plotRouteFromCoordinates(this.stops[0], this.stops[1]);
+  plotRouteFromEvent (e) {
+    console.debug('adding route from contextmenu')
+    this.plotPointFromCoordinates(e.latlng)
+    this.stops.push(e.latlng)
+    if (this.stops.length === 2) {
+      this.plotRouteFromCoordinates(this.stops[0], this.stops[1])
     }
   }
 
-  plotPointFromText(text) {
-    console.debug("Searching for " + text);
-    let self = this;
+  plotPointFromText (text) {
+    console.debug('Searching for' + text)
+    const self = this
     this.Geocode.geocode({
       text: text,
-      size: 1,
+      size: 1
     })
       .then(function (geojson) {
         console.debug(
-          "Plotting point with coordinates " +
+          'Plotting point with coordinates ' +
             geojson.features[0].geometry.coordinates
-        );
-        const coords = geojson.features[0].geometry.coordinates;
-        self.plotPointFromCoordinates({ lng: coords[0], lat: coords[1] });
+        )
+        const coords = geojson.features[0].geometry.coordinates
+        self.plotPointFromCoordinates({ lng: coords[0], lat: coords[1] })
       })
       .catch(function (err) {
-        console.error(err);
-      });
+        console.error(err)
+      })
   }
 
-  plotRouteFromCoordinates(origin, destination) {
-    console.debug("plotting route between " + origin + " and " + destination);
-    let self = this;
+  plotRouteFromCoordinates (origin, destination) {
+    console.debug('plotting route between ' + origin + ' and ' + destination)
+    const self = this
     this.orsDirections
       .calculate({
         coordinates: [
           [origin.lng, origin.lat],
-          [destination.lng, destination.lat],
+          [destination.lng, destination.lat]
         ],
-        profile: "driving-car",
-        instructions: "false",
-        format: "geojson",
+        profile: 'driving-car',
+        instructions: 'false',
+        format: 'geojson'
       })
       .then(function (geojson) {
-        console.debug("plotting route :");
-        console.debug(geojson);
-        self.addLayer(LayerType.ROUTE, geojson);
+        console.debug('plotting route :')
+        console.debug(geojson)
+        self.addLayer(LayerType.ROUTE, geojson)
       })
       .catch(function (err) {
-        console.error(err);
-      });
+        console.error(err)
+      })
   }
 
-  plotRouteFromText(pointA, pointB) {
-    console.debug("searching for route between " + pointA + " and " + pointB);
-    let self = this;
+  plotRouteFromText (pointA, pointB) {
+    console.debug('searching for route between ' + pointA + ' and ' + pointB)
+    const self = this
     Promise.allSettled([
       this.Geocode.geocode({
         text: pointA,
-        size: 1,
+        size: 1
       }),
       this.Geocode.geocode({
         text: pointB,
-        size: 1,
-      }),
+        size: 1
+      })
     ])
       .then(function (response) {
-        const origin = self.getLatLngFromGeojson(response[0]);
-        const destination = self.getLatLngFromGeojson(response[1]);
-        self.plotPointFromCoordinates(origin);
-        self.plotPointFromCoordinates(destination);
-        self.plotRouteFromCoordinates(origin, destination);
+        const origin = self.getLatLngFromGeojson(response[0])
+        const destination = self.getLatLngFromGeojson(response[1])
+        self.plotPointFromCoordinates(origin)
+        self.plotPointFromCoordinates(destination)
+        self.plotRouteFromCoordinates(origin, destination)
       })
       .catch(function (err) {
-        console.error(err);
-      });
+        console.error(err)
+      })
   }
 
-  getAutocomplete(text, callback) {
-    console.debug("searching autocomplete for " + text);
+  getAutocomplete (text, callback) {
+    console.debug('searching autocomplete for ' + text)
     this.Geocode.autocomplete({
-      text: text,
+      text: text
     })
       .then(function (result) {
-        callback(result.features.map((e) => e.properties.label));
+        callback(result.features.map((e) => e.properties.label))
       })
       .catch(function (err) {
-        console.error(err);
-      });
+        console.error(err)
+      })
   }
 
-  clearMap() {
+  clearMap () {
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
-        console.debug("removing layer");
-        layer.remove();
+        console.debug('removing layer')
+        layer.remove()
       }
-    });
+    })
   }
 
-  getLatLngFromGeojson(geojson) {
+  getLatLngFromGeojson (geojson) {
     return {
       lng: geojson.value.features[0].geometry.coordinates[0],
-      lat: geojson.value.features[0].geometry.coordinates[1],
-    };
+      lat: geojson.value.features[0].geometry.coordinates[1]
+    }
   }
 }
 
