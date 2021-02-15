@@ -2,7 +2,7 @@ import Openrouteservice from 'openrouteservice-js'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-contextmenu'
-import 'leaflet-contextmenu/dist/leaflet.contextmenu.min.css"'
+import 'leaflet-contextmenu/dist/leaflet.contextmenu.min.css'
 // Fixing leaflet webpack compatibility, see https://github.com/Leaflet/Leaflet/issues/4968
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'
 import 'leaflet-defaulticon-compatibility'
@@ -12,6 +12,7 @@ const LayerType = {
   MARKER: 'marker',
   ROUTE: 'route'
 }
+const TRAVELMAP_API_ROOT = 'http://localhost:8000'
 
 class MappingClient {
   // mapIdd: the id of the DOM element to load the map
@@ -213,6 +214,44 @@ class MappingClient {
         layer.remove()
       }
     })
+  }
+
+  saveMap () {
+    this.map.eachLayer((layer) => {
+      if ((layer instanceof L.Marker)) {
+        fetch(TRAVELMAP_API_ROOT + '/markers/', {
+          method: 'POST',
+          body: JSON.stringify({
+            lat: layer.getLatLng().lat,
+            lng: layer.getLatLng().lng
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(function (result) {
+            console.debug('Layer saved')
+          })
+          .catch(function (err) {
+            console.error(err)
+          })
+      }
+    })
+  }
+
+  loadMap () {
+    const self = this
+    fetch(TRAVELMAP_API_ROOT + '/markers/')
+      .then(response => response.json())
+      .then(markers => {
+        markers.forEach(marker => {
+          console.debug('loading marker')
+          self.addLayer(LayerType.MARKER, marker)
+        })
+      })
+      .catch(function (err) {
+        console.error(err)
+      })
   }
 
   getLatLngFromGeojson (geojson) {

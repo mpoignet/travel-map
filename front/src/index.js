@@ -7,6 +7,8 @@ const SEARCH_INPUT_ID = 'search-input'
 const SEARCH_BTN_ID = 'search-btn'
 const ROUTE_BTN_ID = 'route-btn'
 const CLEAR_BTN_ID = 'clear-btn'
+const SAVE_BTN_ID = 'save-btn'
+const LOAD_BTN_ID = 'load-btn'
 
 window.onload = function () {
   const mappingClient = new MappingClient('map')
@@ -30,6 +32,14 @@ window.onload = function () {
         })
       })
     }
+  })
+
+  document.getElementById(SAVE_BTN_ID).addEventListener('click', (e) => {
+    mappingClient.saveMap()
+  })
+
+  document.getElementById(LOAD_BTN_ID).addEventListener('click', (e) => {
+    mappingClient.loadMap()
   })
 
   document.getElementById(CLEAR_BTN_ID).addEventListener('click', (e) => {

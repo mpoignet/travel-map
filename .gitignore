@@ -1,2 +1,9 @@
 node_modules
 notes.txt
+front/dist/main.js
+front/dist/*.png
+
+venv
+.idea
+**/__pycache__
+*.sqlite3
