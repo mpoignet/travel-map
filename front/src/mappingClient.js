@@ -7,21 +7,21 @@ import 'leaflet-contextmenu/dist/leaflet.contextmenu.min.css'
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'
 import 'leaflet-defaulticon-compatibility'
 
-const API_TOKEN = '5b3ce3597851110001cf6248bd9653bdfbb34639abfd8b798225be02'
 const LayerType = {
   MARKER: 'marker',
   ROUTE: 'route'
 }
-const TRAVELMAP_API_ROOT = 'http://localhost:8000'
+
+const conf = require('./config.json')
 
 class MappingClient {
   // mapIdd: the id of the DOM element to load the map
   constructor (mapId) {
     this.orsDirections = new Openrouteservice.Directions({
-      api_key: API_TOKEN
+      api_key: conf.API_TOKEN
     })
     this.Geocode = new Openrouteservice.Geocode({
-      api_key: API_TOKEN
+      api_key: conf.API_TOKEN
     })
     this.orsUtil = new Openrouteservice.Util()
     const self = this
@@ -219,7 +219,7 @@ class MappingClient {
   saveMap () {
     this.map.eachLayer((layer) => {
       if ((layer instanceof L.Marker)) {
-        fetch(TRAVELMAP_API_ROOT + '/markers/', {
+        fetch(conf.TRAVELMAP_API_ROOT + '/markers/', {
           method: 'POST',
           body: JSON.stringify({
             lat: layer.getLatLng().lat,
@@ -241,7 +241,7 @@ class MappingClient {
 
   loadMap () {
     const self = this
-    fetch(TRAVELMAP_API_ROOT + '/markers/')
+    fetch(conf.TRAVELMAP_API_ROOT + '/markers/')
       .then(response => response.json())
       .then(markers => {
         markers.forEach(marker => {
