@@ -39,6 +39,7 @@ window.onload = function () {
   })
 
   document.getElementById(LOAD_BTN_ID).addEventListener('click', (e) => {
+    mappingClient.clearMap()
     mappingClient.loadMap()
   })
 
