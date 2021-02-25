@@ -44,5 +44,10 @@ html, body {
 }
 .panel-btn--standalone {
   margin: 10px;
-  align-self: flex-end;
+  /*align-self: flex-end;*/
+}
+
+#panel-controls {
+  display: flex;
+  justify-content: flex-end;
 }

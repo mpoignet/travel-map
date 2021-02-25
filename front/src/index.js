@@ -72,6 +72,7 @@ window.onload = function () {
     const button = document.createElement('button')
     button.id = 'destination-btn'
     button.className = 'panel-btn'
+    button.className += ' panel-btn--icon'
     const icon = document.createElement('i')
     icon.className += 'fas fa-directions'
     button.appendChild(icon)
@@ -82,6 +83,6 @@ window.onload = function () {
       )
     })
     searchLine.appendChild(button)
-    document.getElementById('panel').appendChild(searchLine)
+    document.getElementById('search-panel').appendChild(searchLine)
   }
 }

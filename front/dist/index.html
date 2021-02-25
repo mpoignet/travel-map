@@ -10,16 +10,21 @@
   <body>
     <div id="wrapper">
       <div id="panel">
-        <div class="search-line">
-          <input type="text" id="search-input" class="panel-input" list="suggestions">
-          <datalist id="suggestions"></datalist>
-          <button id="search-btn" class="panel-btn panel-btn--icon"><i class="fas fa-search"></i></button>
-          <button id="route-btn" class="panel-btn panel-btn--icon"><i class="fas fa-directions"></i></button>
-        </div> 
+        <div id="search-panel">
+          <div class="search-line">
+            <input type="text" id="search-input" class="panel-input" list="suggestions">
+            <datalist id="suggestions"></datalist>
+            <button id="search-btn" class="panel-btn panel-btn--icon"><i class="fas fa-search"></i></button>
+            <button id="route-btn" class="panel-btn panel-btn--icon"><i class="fas fa-directions"></i></button>
+          </div> 
+        </div>
+        
+        <div id="panel-controls">
+          <button id="clear-btn" class="panel-btn panel-btn--standalone">Clear</button>
+          <button id="save-btn" class="panel-btn panel-btn--standalone">Save</button>
+          <button id="load-btn" class="panel-btn panel-btn--standalone">Load</button>
+        </div>
 
-        <button id="clear-btn" class="panel-btn panel-btn--standalone">Clear map</button>
-        <button id="save-btn" class="panel-btn panel-btn--standalone">Save map</button>
-        <button id="load-btn" class="panel-btn panel-btn--standalone">Load map</button>
     </div>
     <div id="map"></div>
     </div>
