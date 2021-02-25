@@ -57,25 +57,32 @@ window.onload = function () {
     mappingClient.plotPointFromText(
       document.getElementById(SEARCH_INPUT_ID).value
     )
-    addDestinationToPanel()
+    switchSearchToRoute()
   })
+
+  function switchSearchToRoute () {
+    changeSearchLine()
+    addDestinationToPanel()
+  }
+
+  function changeSearchLine () {
+    document.getElementById('search-btn').remove()
+    document.getElementById('route-btn').remove()
+    document.getElementById('search-line-1').appendChild(createSearchButton())
+    document.getElementById('add-btn').innerHTML = 'Add Route'
+  }
 
   function addDestinationToPanel () {
     const searchLine = document.createElement('div')
     searchLine.className += 'search-line'
+    searchLine.id = 'search-line-2'
     const searchInput = document.createElement('input')
     searchInput.setAttribute('type', 'text')
     searchInput.className = 'panel-input'
     searchLine.appendChild(searchInput)
     const dataList = document.createElement('datalist')
     searchLine.appendChild(dataList)
-    const button = document.createElement('button')
-    button.id = 'destination-btn'
-    button.className = 'panel-btn'
-    button.className += ' panel-btn--icon'
-    const icon = document.createElement('i')
-    icon.className += 'fas fa-directions'
-    button.appendChild(icon)
+    const button = createSearchButton()
     button.addEventListener('click', function (e) {
       mappingClient.plotRouteFromText(
         document.getElementById(SEARCH_INPUT_ID).value,
@@ -83,6 +90,17 @@ window.onload = function () {
       )
     })
     searchLine.appendChild(button)
-    document.getElementById('search-panel').appendChild(searchLine)
+    document.getElementById('search-lines').appendChild(searchLine)
+  }
+
+  function createSearchButton () {
+    const button = document.createElement('button')
+    button.id = 'destination-btn'
+    button.className = 'panel-btn'
+    button.className += ' panel-btn--icon'
+    const icon = document.createElement('i')
+    icon.className += 'fas fa-search'
+    button.appendChild(icon)
+    return button
   }
 }

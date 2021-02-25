@@ -23,16 +23,20 @@ html, body {
   display: flex;
   flex-direction: column;
 }
+#search-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
 .search-line {
   width: 100%;
-  padding: 5px;
   display: flex;
   flex-direction: row;
 }
 .panel-input {
   height: 30px;
   width: 100%;
-  margin: 10px;
+  margin-bottom: 10px;
   font-size: 12pt;
 }
 .panel-btn {
@@ -40,14 +44,14 @@ html, body {
 }
 .panel-btn--icon {
   width: 30px;
-  margin: 10px 10px 10px 0;
+  margin-left: 10px;
 }
 .panel-btn--standalone {
   margin: 10px;
-  /*align-self: flex-end;*/
 }
 
 #panel-controls {
   display: flex;
   justify-content: flex-end;
+  margin-top: 100px;
 }
