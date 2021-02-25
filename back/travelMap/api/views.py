@@ -15,3 +15,8 @@ class MarkerList(generics.ListCreateAPIView):
 class MarkerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Marker.objects.all()
     serializer_class = MarkerSerializer
+
+
+class RouteList(generics.ListCreateAPIView):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer

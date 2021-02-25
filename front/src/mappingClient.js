@@ -236,6 +236,24 @@ class MappingClient {
             console.error(err)
           })
       }
+      if ((layer instanceof L.GeoJSON)) {
+        console.debug('I am geojson')
+        fetch(conf.TRAVELMAP_API_ROOT + '/routes/', {
+          method: 'POST',
+          body: JSON.stringify({
+            geoJson: layer.toGeoJSON()
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(function (result) {
+            console.debug('Layer saved')
+          })
+          .catch(function (err) {
+            console.error(err)
+          })
+      }
     })
   }
 
@@ -247,6 +265,17 @@ class MappingClient {
         markers.forEach(marker => {
           console.debug('loading marker')
           self.addLayer(LayerType.MARKER, marker)
+        })
+      })
+      .catch(function (err) {
+        console.error(err)
+      })
+    fetch(conf.TRAVELMAP_API_ROOT + '/routes/')
+      .then(response => response.json())
+      .then(routes => {
+        routes.forEach(route => {
+          console.debug('loading route')
+          self.addLayer(LayerType.ROUTE, route.geoJson)
         })
       })
       .catch(function (err) {
