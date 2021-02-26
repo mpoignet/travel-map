@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Marker, Route
+from api.models import Marker, Route, Map
 
 
 class MarkerSerializer(serializers.ModelSerializer):
@@ -14,9 +14,11 @@ class RouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = '__all__'
 
-# class MapSerializer(serializers.ModelSerializer):
-#     objects = serializers.PrimaryKeyRelatedField(many=True, queryset=MapObject.objects.all())
-#
-#     class Meta:
-#         model = Map
-#         fields = ['id', 'title', 'code']
+
+class MapSerializer(serializers.ModelSerializer):
+    # markers = serializers.PrimaryKeyRelatedField(many=True, queryset=Marker.objects.all())
+    # routes = serializers.PrimaryKeyRelatedField(many=True, queryset=Route.objects.all())
+
+    class Meta:
+        model = Map
+        fields = '__all__'

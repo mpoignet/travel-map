@@ -1,9 +1,11 @@
 from django.urls import path
 
-from api.views import MarkerList, MarkerDetail, RouteList
+from api.views import MapMarkerList, MapMarkerDetail, MapRouteList, MapList, MapDetail
 
 urlpatterns = [
-    path('markers/', MarkerList.as_view()),
-    path('markers/<int:pk>/', MarkerDetail.as_view()),
-    path('routes/', RouteList.as_view()),
+    path('maps/', MapList.as_view()),
+    path('maps/<int:pk>/', MapDetail.as_view()),
+    path('maps/<int:mapId>/markers/', MapMarkerList.as_view()),
+    path('maps/<int:mapId>/markers/<int:pk>/', MapMarkerDetail.as_view()),
+    path('maps/<int:mapId>/routes/', MapRouteList.as_view()),
 ]
