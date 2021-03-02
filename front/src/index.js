@@ -1,7 +1,11 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
 import MappingClient from './mappingClient.js'
 import 'normalize.css'
 import '@fortawesome/fontawesome-free/js/all.js'
 import './style.css'
+import App from './App.js'
+ReactDOM.render(<App />, document.getElementById('root'))
 
 const SEARCH_INPUT_ID = 'search-input'
 const SEARCH_BTN_ID = 'search-btn'
