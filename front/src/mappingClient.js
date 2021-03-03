@@ -16,7 +16,7 @@ const conf = require('./config.json')
 
 class MappingClient {
   // mapIdd: the id of the DOM element to load the map
-  constructor (mapId) {
+  constructor () {
     this.orsDirections = new Openrouteservice.Directions({
       api_key: conf.API_TOKEN
     })
@@ -46,7 +46,9 @@ class MappingClient {
       self.orsUtil.copyProperties(reqArgs, this.args)
       return this.geocodePromise()
     }
+  }
 
+  initMap (mapId) {
     // Initialize Leaflet
     this.map = L.map(mapId, {
       contextmenu: true,
