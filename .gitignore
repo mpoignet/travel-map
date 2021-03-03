@@ -1,10 +1,10 @@
 node_modules
-dist
 notes.txt
-front/dist/main.js
-front/dist/*.png
+front/dist/
+front/src/config.json
 
 venv
 .idea
 **/__pycache__
 *.sqlite3
+back/travelMap/secrets.json
