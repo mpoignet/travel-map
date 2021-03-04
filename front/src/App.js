@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import Modal from 'react-modal'
 import MappingClient from './mappingClient.js'
 import './style.css'
+
+Modal.setAppElement('#root')
 
 function App () {
   const mappingClient = new MappingClient()
@@ -81,9 +84,11 @@ function SearchLine (props) {
       value={searchText} onChange={ (e) => handleChange(e) }
       onKeyUp={ (e) => handleKeyUp(e) } />
       <datalist id="suggestions">
-        {suggestions.map((suggestion, index) => {
-          return <option key={index} value={suggestion}></option>
-        })}
+        {
+          suggestions.map((suggestion, index) => {
+            return <option key={index} value={suggestion}></option>
+          })
+        }
       </datalist>
       <SearchButton onClick= { (e) => handleSearchBtnClick(e) } />
       {
@@ -107,6 +112,15 @@ function SearchButton (props) {
 }
 
 function PanelControls (props) {
+  const [modalIsOpen, setIsOpen] = React.useState(false)
+  function openModal () {
+    setIsOpen(true)
+  }
+  // function afterOpenModal () {
+  // }
+  function closeModal () {
+    setIsOpen(false)
+  }
   return (
     <div id="panel-controls">
       <button id="clear-btn" className="panel-btn panel-btn--standalone"
@@ -114,11 +128,58 @@ function PanelControls (props) {
       <button id="save-btn" className="panel-btn panel-btn--standalone"
       onClick={ () => props.mappingClient.saveMap()}>Save</button>
       <button id="load-btn" className="panel-btn panel-btn--standalone"
-      onClick={ () => {
-        props.mappingClient.clearMap()
-        props.mappingClient.loadMap()
-      }}>Load</button>
+      onClick={openModal}>Load</button>
+      <LoadingModal isOpen={modalIsOpen} onClose={closeModal}
+      mappingClient={props.mappingClient} user="" />
     </div>
+  )
+}
+
+const modalStyles = {
+  overlay: {
+    zIndex: '1000'
+  },
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)'
+  }
+}
+
+function LoadingModal (props) {
+  const [maps, setMaps] = useState([])
+  useEffect(() => {
+    props.mappingClient.getMaps((maps) => setMaps(maps))
+  }, [props.user])
+  const loadMap = (mapId) => {
+    props.mappingClient.clearMap()
+    props.mappingClient.loadMap(mapId)
+    props.onClose()
+  }
+  return (
+    <Modal
+      isOpen={props.isOpen}
+      // onAfterOpen={afterOpenModal}
+      onRequestClose={props.onClose}
+      style={modalStyles}
+      contentLabel="Example Modal"
+    >
+      <h2>Select a map</h2>
+        <ul className='mapList'>
+        {
+          maps.map(map => {
+            return <li className='MapListItem' key={map.id}>
+                <a onClick={ () => loadMap(map.id)} href='#'>{map.title}</a>
+              </li>
+          })
+        }
+        </ul>
+      <button onClick={loadMap}>close</button>
+      <button onClick={props.onClose}>close</button>
+    </Modal>
   )
 }
 

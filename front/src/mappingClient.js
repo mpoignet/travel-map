@@ -209,6 +209,16 @@ class MappingClient {
       })
   }
 
+  getMaps (callback) {
+    console.debug('getting map list')
+    fetch(conf.TRAVELMAP_API_ROOT + '/maps/')
+      .then(response => response.json())
+      .then(maps => callback(maps))
+      .catch(function (err) {
+        console.error(err)
+      })
+  }
+
   clearMap () {
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
@@ -259,9 +269,9 @@ class MappingClient {
     })
   }
 
-  loadMap () {
+  loadMap (mapId) {
     const self = this
-    fetch(conf.TRAVELMAP_API_ROOT + '/markers/')
+    fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/markers/')
       .then(response => response.json())
       .then(markers => {
         markers.forEach(marker => {
@@ -272,7 +282,7 @@ class MappingClient {
       .catch(function (err) {
         console.error(err)
       })
-    fetch(conf.TRAVELMAP_API_ROOT + '/routes/')
+    fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/routes/')
       .then(response => response.json())
       .then(routes => {
         routes.forEach(route => {
