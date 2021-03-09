@@ -112,12 +112,16 @@ function SearchButton (props) {
 }
 
 function PanelControls (props) {
-  const [modalIsOpen, setIsOpen] = React.useState(false)
+  const [modalIsOpen, setIsOpen] = useState(false)
+  const [currentMapId, setCurrentMapId] = useState(null)
   function openModal () {
     setIsOpen(true)
   }
   // function afterOpenModal () {
   // }
+  function changeCurrentMapId (mapId) {
+    setCurrentMapId(mapId)
+  }
   function closeModal () {
     setIsOpen(false)
   }
@@ -126,11 +130,12 @@ function PanelControls (props) {
       <button id="clear-btn" className="panel-btn panel-btn--standalone"
       onClick={ () => props.mappingClient.clearMap()}>Clear</button>
       <button id="save-btn" className="panel-btn panel-btn--standalone"
-      onClick={ () => props.mappingClient.saveMap()}>Save</button>
+      onClick={ () => props.mappingClient.saveMap(currentMapId)}>Save</button>
       <button id="load-btn" className="panel-btn panel-btn--standalone"
       onClick={openModal}>Load</button>
       <LoadingModal isOpen={modalIsOpen} onClose={closeModal}
-      mappingClient={props.mappingClient} user="" />
+      mappingClient={props.mappingClient} user=""
+      changeCurrentMapId = {changeCurrentMapId} />
     </div>
   )
 }
@@ -158,6 +163,7 @@ function LoadingModal (props) {
     props.mappingClient.clearMap()
     props.mappingClient.loadMap(mapId)
     props.onClose()
+    props.changeCurrentMapId(mapId)
   }
   return (
     <Modal

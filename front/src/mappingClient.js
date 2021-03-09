@@ -228,50 +228,47 @@ class MappingClient {
     })
   }
 
-  saveMap () {
+  saveMap (mapId) {
+    mapId = 1
+    console.debug('Saving map with id: ' + mapId)
+    const mapToSave = {
+      id: mapId,
+      title: 'toto',
+      markers: [],
+      routes: []
+    }
     this.map.eachLayer((layer) => {
       if ((layer instanceof L.Marker)) {
-        fetch(conf.TRAVELMAP_API_ROOT + '/markers/', {
-          method: 'POST',
-          body: JSON.stringify({
-            lat: layer.getLatLng().lat,
-            lng: layer.getLatLng().lng
-          }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
+        mapToSave.markers.push({
+          lat: layer.getLatLng().lat,
+          lng: layer.getLatLng().lng
         })
-          .then(function (result) {
-            console.debug('Layer saved')
-          })
-          .catch(function (err) {
-            console.error(err)
-          })
       }
       if ((layer instanceof L.GeoJSON)) {
-        console.debug('I am geojson')
-        fetch(conf.TRAVELMAP_API_ROOT + '/routes/', {
-          method: 'POST',
-          body: JSON.stringify({
-            geoJson: layer.toGeoJSON()
-          }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
+        mapToSave.routes.push({
+          geoJson: layer.toGeoJSON()
         })
-          .then(function (result) {
-            console.debug('Layer saved')
-          })
-          .catch(function (err) {
-            console.error(err)
-          })
       }
     })
+    fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/', {
+        method: 'PUT',
+        body: JSON.stringify(mapToSave),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(function (result) {
+          console.debug('Map saved')
+        })
+        .catch(function (err) {
+          console.error(err)
+        })
   }
 
   loadMap (mapId) {
     const self = this
-    fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/markers/')
+    const loadingApi = conf.TRAVELMAP_API_ROOT + '/maps/' + mapId
+    fetch(loadingApi + '/markers/')
       .then(response => response.json())
       .then(markers => {
         markers.forEach(marker => {

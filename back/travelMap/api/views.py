@@ -18,11 +18,13 @@ class MapMarkerList(generics.ListCreateAPIView):
     serializer_class = MarkerSerializer
 
     def get_queryset(self):
+        print("getting markers")
         map_id = self.kwargs['mapId']
         return Marker.objects.filter(map_id=map_id)
 
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=self.request.user)
+    def perform_create(self, serializer):
+        map_ = Map.objects.get(pk=self.kwargs['mapId'])
+        serializer.save(map=map_)
 
 
 class MapMarkerDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -39,3 +41,7 @@ class MapRouteList(generics.ListCreateAPIView):
     def get_queryset(self):
         map_id = self.kwargs['mapId']
         return Route.objects.filter(map_id=map_id)
+
+    def perform_create(self, serializer):
+        map_ = Map.objects.get(pk=self.kwargs['mapId'])
+        serializer.save(map=map_)
