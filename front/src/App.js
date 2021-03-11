@@ -55,7 +55,7 @@ function SearchPanel (props) {
 
 function SearchLine (props) {
   const [searchText, setSearchText] = useState('')
-  const [suggestions, setSuggestions] = useState([])
+  const [suggestionSet, setSuggestionSet] = useState({})
   const [lastKeyPressed, setLastKeyPressed] = useState(undefined)
 
   const handleChange = (e) => {
@@ -71,12 +71,12 @@ function SearchLine (props) {
       props.mappingClient.getAutocomplete(searchText, (newSuggestions) => {
         console.debug('Results of autocomplete: ')
         console.debug(newSuggestions)
-        setSuggestions(newSuggestions)
+        setSuggestionSet(newSuggestions)
       })
     }
   }
 
-  const handleSelectedOption = (e) => {
+  const handleKeyDown = (e) => {
     setLastKeyPressed(e.keyCode)
   }
 
@@ -85,9 +85,10 @@ function SearchLine (props) {
   }
 
   const handleInput = (e) => {
+    // Option selected from the datalist of suggestions
     if (!lastKeyPressed) {
       console.debug('option selected: ' + e.target.value)
-      props.mappingClient.plotPointFromText(e.target.value)
+      props.mappingClient.plotPointFromCoordinates(suggestionSet[e.target.value])
     }
   }
 
@@ -95,12 +96,12 @@ function SearchLine (props) {
     <div className="search-line" id="search-line-1">
       <input type="text" id="search-input" className="panel-input" list="suggestions"
       value={searchText} onChange={ (e) => handleChange(e) }
-      onKeyDown={ (e) => handleSelectedOption(e) }
+      onKeyDown={ (e) => handleKeyDown(e) }
       onKeyUp={ (e) => handleKeyUp(e) }
       onInput={ (e) => handleInput(e) } />
       <datalist id="suggestions">
         {
-          suggestions.map((suggestion, index) => {
+          Object.keys(suggestionSet).map((suggestion, index) => {
             return <option key={index} value={suggestion}></option>
           })
         }

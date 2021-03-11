@@ -204,7 +204,14 @@ class MappingClient {
     })
       .then(function (result) {
         console.debug(result)
-        callback(result.features.map((e) => e.properties.label))
+        const suggestions = {}
+        result.features.forEach((feature) => {
+          suggestions[feature.properties.label] = {
+            lng: feature.geometry.coordinates[0],
+            lat: feature.geometry.coordinates[1]
+          }
+        })
+        callback(suggestions)
       })
       .catch(function (err) {
         console.error(err)
