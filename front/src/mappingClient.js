@@ -199,9 +199,11 @@ class MappingClient {
   getAutocomplete (text, callback) {
     console.debug('searching autocomplete for ' + text)
     this.Geocode.autocomplete({
-      text: text
+      text: text,
+      size: 10
     })
       .then(function (result) {
+        console.debug(result)
         callback(result.features.map((e) => e.properties.label))
       })
       .catch(function (err) {
@@ -233,7 +235,7 @@ class MappingClient {
     console.debug('Saving map with id: ' + mapId)
     const mapToSave = {
       id: mapId,
-      title: 'toto',
+      title: 'My map',
       markers: [],
       routes: []
     }
@@ -251,18 +253,18 @@ class MappingClient {
       }
     })
     fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/', {
-        method: 'PUT',
-        body: JSON.stringify(mapToSave),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      method: 'PUT',
+      body: JSON.stringify(mapToSave),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(function (result) {
+        console.debug('Map saved')
       })
-        .then(function (result) {
-          console.debug('Map saved')
-        })
-        .catch(function (err) {
-          console.error(err)
-        })
+      .catch(function (err) {
+        console.error(err)
+      })
   }
 
   loadMap (mapId) {

@@ -56,9 +56,17 @@ function SearchPanel (props) {
 function SearchLine (props) {
   const [searchText, setSearchText] = useState('')
   const [suggestions, setSuggestions] = useState([])
+  const [lastKeyPressed, setLastKeyPressed] = useState(undefined)
 
   const handleChange = (e) => {
     setSearchText(e.target.value)
+  }
+  const handleKeyUp = (e) => {
+    // Test for Enter key
+    if (e.keyCode === 13) {
+      props.mappingClient.plotPointFromText(searchText)
+      return
+    }
     if (searchText.length > 3) {
       props.mappingClient.getAutocomplete(searchText, (newSuggestions) => {
         console.debug('Results of autocomplete: ')
@@ -67,22 +75,29 @@ function SearchLine (props) {
       })
     }
   }
-  const handleKeyUp = (e) => {
-    // Test for Enter key
-    if (e.keyCode === 13) {
-      props.mappingClient.plotPointFromText(searchText)
-    }
+
+  const handleSelectedOption = (e) => {
+    setLastKeyPressed(e.keyCode)
   }
 
   const handleSearchBtnClick = (e) => {
     props.mappingClient.plotPointFromText(searchText)
   }
 
+  const handleInput = (e) => {
+    if (!lastKeyPressed) {
+      console.debug('option selected: ' + e.target.value)
+      props.mappingClient.plotPointFromText(e.target.value)
+    }
+  }
+
   return (
     <div className="search-line" id="search-line-1">
       <input type="text" id="search-input" className="panel-input" list="suggestions"
       value={searchText} onChange={ (e) => handleChange(e) }
-      onKeyUp={ (e) => handleKeyUp(e) } />
+      onKeyDown={ (e) => handleSelectedOption(e) }
+      onKeyUp={ (e) => handleKeyUp(e) }
+      onInput={ (e) => handleInput(e) } />
       <datalist id="suggestions">
         {
           suggestions.map((suggestion, index) => {
@@ -113,14 +128,8 @@ function SearchButton (props) {
 
 function PanelControls (props) {
   const [modalIsOpen, setIsOpen] = useState(false)
-  const [currentMapId, setCurrentMapId] = useState(null)
   function openModal () {
     setIsOpen(true)
-  }
-  // function afterOpenModal () {
-  // }
-  function changeCurrentMapId (mapId) {
-    setCurrentMapId(mapId)
   }
   function closeModal () {
     setIsOpen(false)
@@ -130,12 +139,11 @@ function PanelControls (props) {
       <button id="clear-btn" className="panel-btn panel-btn--standalone"
       onClick={ () => props.mappingClient.clearMap()}>Clear</button>
       <button id="save-btn" className="panel-btn panel-btn--standalone"
-      onClick={ () => props.mappingClient.saveMap(currentMapId)}>Save</button>
+      onClick={ () => props.mappingClient.saveMap()}>Save</button>
       <button id="load-btn" className="panel-btn panel-btn--standalone"
       onClick={openModal}>Load</button>
       <LoadingModal isOpen={modalIsOpen} onClose={closeModal}
-      mappingClient={props.mappingClient} user=""
-      changeCurrentMapId = {changeCurrentMapId} />
+      mappingClient={props.mappingClient} user="" />
     </div>
   )
 }
@@ -163,7 +171,6 @@ function LoadingModal (props) {
     props.mappingClient.clearMap()
     props.mappingClient.loadMap(mapId)
     props.onClose()
-    props.changeCurrentMapId(mapId)
   }
   return (
     <Modal
