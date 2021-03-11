@@ -62,6 +62,10 @@ function SearchLine (props) {
     setSearchText(e.target.value)
   }
   const handleKeyUp = (e) => {
+    // If no key code, then the event was triggered by selecting an option
+    if (!e.keyCode) {
+      return
+    }
     // Test for Enter key
     if (e.keyCode === 13) {
       props.mappingClient.plotPointFromText(searchText)
