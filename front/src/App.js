@@ -91,8 +91,9 @@ function SearchLine (props) {
   const handleInput = (e) => {
     // Option selected from the datalist of suggestions
     if (!lastKeyPressed) {
-      console.debug('option selected: ' + e.target.value)
-      props.mappingClient.plotPointFromCoordinates(suggestionSet[e.target.value])
+      const option = e.target.value
+      console.debug('option selected: ' + option)
+      props.mappingClient.addMarker(option, suggestionSet[option])
     }
   }
 

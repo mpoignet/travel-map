@@ -30,9 +30,6 @@ class MappingClient {
     this.plotPointFromEvent = this.plotPointFromEvent.bind(this)
     this.plotRouteFromEvent = this.plotRouteFromEvent.bind(this)
 
-    // Keep track of the current stops for the route
-    this.stops = []
-
     // Add an autocomplete function to the SDK
     this.Geocode.autocomplete = function (reqArgs) {
       // Get custom header and remove from args
@@ -46,6 +43,11 @@ class MappingClient {
       self.orsUtil.copyProperties(reqArgs, this.args)
       return this.geocodePromise()
     }
+
+    // Create data structures for map objects
+    this.markers = []
+    this.routes = []
+    this.stops = []
   }
 
   initMap (mapId) {
@@ -82,11 +84,10 @@ class MappingClient {
 
   deleteLayer (e) {
     console.debug('deleting layer')
-    console.debug(e)
     this.remove()
   }
 
-  addLayer (type, object) {
+  createLayer (type, object) {
     let layerConstructor
     switch (type) {
       case LayerType.MARKER: layerConstructor = L.marker; break
@@ -103,25 +104,33 @@ class MappingClient {
       ]
     })
     layer.options.contextmenuItems[0].context = layer
-    layer.addTo(this.map)
+    return layer
   }
 
-  plotPointFromCoordinates (coordinates) {
-    console.debug(coordinates)
-    this.addLayer(LayerType.MARKER, {
+  addMarker (label, coordinates) {
+    console.debug('adding marker "" with coordinates: ' + coordinates)
+    const layer = this.createLayer(LayerType.MARKER, {
       lon: coordinates.lng,
       lat: coordinates.lat
     })
+    this.markers.push({
+      label: label,
+      lng: coordinates.lng,
+      lat: coordinates.lat,
+      layer: layer
+    })
+    layer.addTo(this.map)
+    layer.bindTooltip(label).openTooltip()
   }
 
   plotPointFromEvent (e) {
     console.debug('adding marker from contextmenu')
-    this.plotPointFromCoordinates(e.latlng)
+    this.addMarker('', e.latlng)
   }
 
   plotRouteFromEvent (e) {
     console.debug('adding route from contextmenu')
-    this.plotPointFromCoordinates(e.latlng)
+    this.addMarker('', e.latlng)
     this.stops.push(e.latlng)
     if (this.stops.length === 2) {
       this.plotRouteFromCoordinates(this.stops[0], this.stops[1])
@@ -141,7 +150,7 @@ class MappingClient {
             geojson.features[0].geometry.coordinates
         )
         const coords = geojson.features[0].geometry.coordinates
-        self.plotPointFromCoordinates({ lng: coords[0], lat: coords[1] })
+        self.addMarker(text, { lng: coords[0], lat: coords[1] })
       })
       .catch(function (err) {
         console.error(err)
@@ -164,7 +173,8 @@ class MappingClient {
       .then(function (geojson) {
         console.debug('plotting route :')
         console.debug(geojson)
-        self.addLayer(LayerType.ROUTE, geojson)
+        const layer = self.createLayer(LayerType.ROUTE, geojson)
+        layer.addTo(self.map)
       })
       .catch(function (err) {
         console.error(err)
