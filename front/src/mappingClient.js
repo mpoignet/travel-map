@@ -26,10 +26,6 @@ class MappingClient {
     this.orsUtil = new Openrouteservice.Util()
     const self = this
 
-    // Bindings
-    this.plotPointFromEvent = this.plotPointFromEvent.bind(this)
-    this.plotRouteFromEvent = this.plotRouteFromEvent.bind(this)
-
     // Add an autocomplete function to the SDK
     this.Geocode.autocomplete = function (reqArgs) {
       // Get custom header and remove from args
@@ -46,8 +42,7 @@ class MappingClient {
 
     // Create data structures for map objects
     this.idCounter = 0
-    this.markers = {}
-    this.routes = []
+    this.mapObjects = {}
     this.stops = []
   }
 
@@ -59,11 +54,17 @@ class MappingClient {
       contextmenuItems: [
         {
           text: 'Add marker',
-          callback: this.plotPointFromEvent
+          callback: (e) => this.addMarker('', e.latlng)
         },
         {
           text: 'Add route',
-          callback: this.plotRouteFromEvent
+          callback: (e) => {
+            this.addMarker('', e.latlng)
+            this.stops.push(e.latlng)
+            if (this.stops.length === 2) {
+              this.plotRouteFromCoordinates(this.stops[0], this.stops[1])
+            }
+          }
         }
       ]
     }).setView({ lon: 0, lat: 0 }, 2)
@@ -79,12 +80,8 @@ class MappingClient {
     L.control.scale().addTo(this.map)
   }
 
-  getNextElementId () {
+  getNextMapObjectId () {
     return this.idCounter++
-  }
-
-  addEventListener (...args) {
-    this.map.addEventListener(...args)
   }
 
   deleteLayer (e) {
@@ -94,26 +91,23 @@ class MappingClient {
 
   renameObject (id, newName) {
     console.debug('renaming layer ' + newName)
-    this.markers[id].label = newName
+    this.mapObjects[id].label = newName
   }
 
-  createLayer (type, object) {
+  createLayer (object) {
     let layerConstructor
-    switch (type) {
-      case LayerType.MARKER: layerConstructor = L.marker; break
-      case LayerType.ROUTE: layerConstructor = L.geoJson; break
+    let layerData
+    switch (object.type) {
+      case LayerType.MARKER: layerConstructor = L.marker; layerData = { lon: object.lng, lat: object.lat }; break
+      case LayerType.ROUTE: layerConstructor = L.geoJson; layerData = object.geojson; break
     }
-    const layer = layerConstructor(object, {
+    const layer = layerConstructor(layerData, {
       contextmenu: true,
       contextmenuWidth: 140,
       contextmenuItems: [
         {
           text: 'Delete',
           callback: this.deleteLayer
-        },
-        {
-          text: 'Rename',
-          callback: this.renameLayer
         }
       ]
     })
@@ -137,38 +131,35 @@ class MappingClient {
 
   addMarker (label, coordinates) {
     console.debug('adding marker "" with coordinates: ' + coordinates)
-    const layer = this.createLayer(LayerType.MARKER, {
-      lon: coordinates.lng,
-      lat: coordinates.lat
-    })
-    const id = this.getNextElementId()
-    this.markers[id] = {
+    const mapObject = {
+      type: LayerType.MARKER,
       label: label,
       lng: coordinates.lng,
-      lat: coordinates.lat,
-      layer: layer
+      lat: coordinates.lat
     }
+    const layer = this.createLayer(mapObject)
+    mapObject.layer = layer
+    const id = this.getNextMapObjectId()
+    this.mapObjects[id] = mapObject
     layer.addTo(this.map)
-    // layer.bindTooltip(label).openTooltip()
     const popup = L.popup({ className: 'labelPopup' }).setContent(this.createLabelInput(id, label))
     layer.bindPopup(popup).openPopup()
   }
 
-  plotPointFromEvent (e) {
-    console.debug('adding marker from contextmenu')
-    this.addMarker('', e.latlng)
-  }
-
-  plotRouteFromEvent (e) {
-    console.debug('adding route from contextmenu')
-    this.addMarker('', e.latlng)
-    this.stops.push(e.latlng)
-    if (this.stops.length === 2) {
-      this.plotRouteFromCoordinates(this.stops[0], this.stops[1])
+  addRoute (geojson) {
+    console.debug('adding route ')
+    const mapObject = {
+      type: LayerType.ROUTE,
+      geojson: geojson
     }
+    const layer = this.createLayer(mapObject)
+    mapObject.layer = layer
+    const id = this.getNextMapObjectId()
+    this.mapObjects[id] = mapObject
+    layer.addTo(this.map)
   }
 
-  plotPointFromText (text) {
+  searchAndAddMarker (text) {
     console.debug('Searching for' + text)
     const self = this
     this.Geocode.geocode({
@@ -204,8 +195,7 @@ class MappingClient {
       .then(function (geojson) {
         console.debug('plotting route :')
         console.debug(geojson)
-        const layer = self.createLayer(LayerType.ROUTE, geojson)
-        layer.addTo(self.map)
+        self.addRoute(geojson)
       })
       .catch(function (err) {
         console.error(err)
