@@ -65,3 +65,8 @@ html, body {
   display: inline;
   font-size: 2em;
 }
+
+.labelInput {
+  border: none;
+}
+

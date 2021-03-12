@@ -45,7 +45,8 @@ class MappingClient {
     }
 
     // Create data structures for map objects
-    this.markers = []
+    this.idCounter = 0
+    this.markers = {}
     this.routes = []
     this.stops = []
   }
@@ -78,6 +79,10 @@ class MappingClient {
     L.control.scale().addTo(this.map)
   }
 
+  getNextElementId () {
+    return this.idCounter++
+  }
+
   addEventListener (...args) {
     this.map.addEventListener(...args)
   }
@@ -85,6 +90,11 @@ class MappingClient {
   deleteLayer (e) {
     console.debug('deleting layer')
     this.remove()
+  }
+
+  renameObject (id, newName) {
+    console.debug('renaming layer ' + newName)
+    this.markers[id].label = newName
   }
 
   createLayer (type, object) {
@@ -100,11 +110,29 @@ class MappingClient {
         {
           text: 'Delete',
           callback: this.deleteLayer
+        },
+        {
+          text: 'Rename',
+          callback: this.renameLayer
         }
       ]
     })
     layer.options.contextmenuItems[0].context = layer
     return layer
+  }
+
+  createLabelInput (id, label) {
+    // '<input class="labelInput" type="text" value="' + label + '"></input>'
+    const self = this
+    const input = document.createElement('input')
+    input.setAttribute('type', 'text')
+    input.setAttribute('value', label)
+    input.className = 'labelInput'
+    input.addEventListener('input', (e) => {
+      console.debug(e)
+      self.renameObject(id, e.target.value)
+    })
+    return input
   }
 
   addMarker (label, coordinates) {
@@ -113,14 +141,17 @@ class MappingClient {
       lon: coordinates.lng,
       lat: coordinates.lat
     })
-    this.markers.push({
+    const id = this.getNextElementId()
+    this.markers[id] = {
       label: label,
       lng: coordinates.lng,
       lat: coordinates.lat,
       layer: layer
-    })
+    }
     layer.addTo(this.map)
-    layer.bindTooltip(label).openTooltip()
+    // layer.bindTooltip(label).openTooltip()
+    const popup = L.popup({ className: 'labelPopup' }).setContent(this.createLabelInput(id, label))
+    layer.bindPopup(popup).openPopup()
   }
 
   plotPointFromEvent (e) {
