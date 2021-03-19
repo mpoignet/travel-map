@@ -7,7 +7,7 @@ import 'leaflet-contextmenu/dist/leaflet.contextmenu.min.css'
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'
 import 'leaflet-defaulticon-compatibility'
 
-const LayerType = {
+const MapObjectType = {
   MARKER: 'marker',
   ROUTE: 'route'
 }
@@ -54,12 +54,12 @@ class MappingClient {
       contextmenuItems: [
         {
           text: 'Add marker',
-          callback: (e) => this.addMarker('', e.latlng)
+          callback: (e) => this.addMarker({ label: '', lat: e.latlng.lat, lng: e.latlng.lng })
         },
         {
           text: 'Add route',
           callback: (e) => {
-            this.addMarker('', e.latlng)
+            this.addMarker({ label: '', lat: e.latlng.lat, lng: e.latlng.lng })
             this.stops.push(e.latlng)
             if (this.stops.length === 2) {
               this.plotRouteFromCoordinates(this.stops[0], this.stops[1])
@@ -84,9 +84,10 @@ class MappingClient {
     return this.idCounter++
   }
 
-  deleteLayer (e) {
+  deleteMapObject (id) {
     console.debug('deleting layer')
-    this.remove()
+    this.mapObjects[id].layer.remove()
+    delete this.mapObjects[id]
   }
 
   renameObject (id, newName) {
@@ -94,12 +95,12 @@ class MappingClient {
     this.mapObjects[id].label = newName
   }
 
-  createLayer (object) {
+  createLayer (id, object) {
     let layerConstructor
     let layerData
     switch (object.type) {
-      case LayerType.MARKER: layerConstructor = L.marker; layerData = { lon: object.lng, lat: object.lat }; break
-      case LayerType.ROUTE: layerConstructor = L.geoJson; layerData = object.geojson; break
+      case MapObjectType.MARKER: layerConstructor = L.marker; layerData = { lon: object.lng, lat: object.lat }; break
+      case MapObjectType.ROUTE: layerConstructor = L.geoJson; layerData = object.geojson; break
     }
     const layer = layerConstructor(layerData, {
       contextmenu: true,
@@ -107,11 +108,17 @@ class MappingClient {
       contextmenuItems: [
         {
           text: 'Delete',
-          callback: this.deleteLayer
+          callback: () => this.deleteMapObject(id)
         }
       ]
     })
     layer.options.contextmenuItems[0].context = layer
+
+    if (object.type === MapObjectType.MARKER) {
+      const popup = L.popup({ className: 'labelPopup' }).setContent(this.createLabelInput(id, object.label))
+      layer.bindPopup(popup).openPopup()
+    }
+
     return layer
   }
 
@@ -128,34 +135,32 @@ class MappingClient {
     return input
   }
 
-  addMarker (label, coordinates) {
-    console.debug('adding marker "" with coordinates: ' + coordinates)
-    const mapObject = {
-      type: LayerType.MARKER,
-      label: label,
-      lng: coordinates.lng,
-      lat: coordinates.lat
-    }
-    const layer = this.createLayer(mapObject)
-    mapObject.layer = layer
+  addMapObject (mapObject) {
     const id = this.getNextMapObjectId()
     this.mapObjects[id] = mapObject
+    const layer = this.createLayer(id, mapObject)
+    mapObject.layer = layer
     layer.addTo(this.map)
-    const popup = L.popup({ className: 'labelPopup' }).setContent(this.createLabelInput(id, label))
-    layer.bindPopup(popup).openPopup()
+  }
+
+  addMarker (marker) {
+    console.debug('adding marker "' + marker.label + '"')
+    const mapObject = {
+      type: MapObjectType.MARKER,
+      label: marker.label,
+      lng: marker.lng,
+      lat: marker.lat
+    }
+    this.addMapObject(mapObject)
   }
 
   addRoute (geojson) {
     console.debug('adding route ')
     const mapObject = {
-      type: LayerType.ROUTE,
+      type: MapObjectType.ROUTE,
       geojson: geojson
     }
-    const layer = this.createLayer(mapObject)
-    mapObject.layer = layer
-    const id = this.getNextMapObjectId()
-    this.mapObjects[id] = mapObject
-    layer.addTo(this.map)
+    this.addMapObject(mapObject)
   }
 
   searchAndAddMarker (text) {
@@ -171,7 +176,7 @@ class MappingClient {
             geojson.features[0].geometry.coordinates
         )
         const coords = geojson.features[0].geometry.coordinates
-        self.addMarker(text, { lng: coords[0], lat: coords[1] })
+        self.addMarker({ label: text, lng: coords[0], lat: coords[1] })
       })
       .catch(function (err) {
         console.error(err)
@@ -259,12 +264,9 @@ class MappingClient {
   }
 
   clearMap () {
-    this.map.eachLayer((layer) => {
-      if (!(layer instanceof L.TileLayer)) {
-        console.debug('removing layer')
-        layer.remove()
-      }
-    })
+    for (const id in this.mapObjects) {
+      this.deleteMapObject(id)
+    }
   }
 
   saveMap (mapId) {
@@ -276,19 +278,23 @@ class MappingClient {
       markers: [],
       routes: []
     }
-    this.map.eachLayer((layer) => {
-      if ((layer instanceof L.Marker)) {
+
+    for (const id in this.mapObjects) {
+      const mapObject = this.mapObjects[id]
+      if (mapObject.type === MapObjectType.MARKER) {
         mapToSave.markers.push({
-          lat: layer.getLatLng().lat,
-          lng: layer.getLatLng().lng
+          title: mapObject.label,
+          lat: mapObject.lat,
+          lng: mapObject.lng
         })
       }
-      if ((layer instanceof L.GeoJSON)) {
+      if (mapObject.type === MapObjectType.ROUTE) {
         mapToSave.routes.push({
-          geoJson: layer.toGeoJSON()
+          title: mapObject.label,
+          geoJson: mapObject.geojson
         })
       }
-    })
+    }
     fetch(conf.TRAVELMAP_API_ROOT + '/maps/' + mapId + '/', {
       method: 'PUT',
       body: JSON.stringify(mapToSave),
@@ -312,7 +318,7 @@ class MappingClient {
       .then(markers => {
         markers.forEach(marker => {
           console.debug('loading marker')
-          self.addLayer(LayerType.MARKER, marker)
+          self.addMarker({ label: marker.title, lat: marker.lat, lng: marker.lng })
         })
       })
       .catch(function (err) {
@@ -323,7 +329,7 @@ class MappingClient {
       .then(routes => {
         routes.forEach(route => {
           console.debug('loading route')
-          self.addLayer(LayerType.ROUTE, route.geoJson)
+          self.addRoute(route.geoJson)
         })
       })
       .catch(function (err) {
