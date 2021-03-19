@@ -38,10 +38,10 @@ function SearchPanel (props) {
       {
         routeMode
           ? <div>
-              <SearchLine mappingClient={props.mappingClient} routeBtn={false}/>
-              <SearchLine mappingClient={props.mappingClient} routeBtn={false}/>
+              <SearchLine index={0} mappingClient={props.mappingClient} routeBtn={false}/>
+              <SearchLine index={1} mappingClient={props.mappingClient} routeBtn={false}/>
             </div>
-          : <SearchLine mappingClient={props.mappingClient} routeBtn={true} toggleRouteMode={toggleRouteMode}/>
+          : <SearchLine index={0} mappingClient={props.mappingClient} routeBtn={true} toggleRouteMode={toggleRouteMode}/>
       }
     </div>
       {
@@ -68,7 +68,7 @@ function SearchLine (props) {
     }
     // Test for Enter key
     if (e.keyCode === 13) {
-      props.mappingClient.plotPointFromText(searchText)
+      props.mappingClient.searchAndAddMarker(searchText)
       return
     }
     if (searchText.length > 3) {
@@ -85,7 +85,7 @@ function SearchLine (props) {
   }
 
   const handleSearchBtnClick = (e) => {
-    props.mappingClient.plotPointFromText(searchText)
+    props.mappingClient.searchAndAddMarker(searchText)
   }
 
   const handleInput = (e) => {
@@ -97,24 +97,26 @@ function SearchLine (props) {
     }
   }
 
+  const datalistId = 'suggestions-' + props.index
+
   return (
-    <div className="search-line" id="search-line-1">
-      <input type="text" id="search-input" className="panel-input" list="suggestions"
+    <div className="search-line">
+      <input type="text" className="panel-input" list={datalistId}
       value={searchText} onChange={ (e) => handleChange(e) }
       onKeyDown={ (e) => handleKeyDown(e) }
       onKeyUp={ (e) => handleKeyUp(e) }
       onInput={ (e) => handleInput(e) } />
-      <datalist id="suggestions">
+      <datalist id={datalistId}>
         {
           Object.keys(suggestionSet).map((suggestion, index) => {
-            return <option key={index} value={suggestion}></option>
+            return <option key={'suggestion-' + props.index + '-' +index} value={suggestion}></option>
           })
         }
       </datalist>
       <SearchButton onClick= { (e) => handleSearchBtnClick(e) } />
       {
         props.routeBtn &&
-        <button id="route-btn" className="panel-btn panel-btn--icon"
+        <button className="panel-btn panel-btn--icon"
         onClick={ props.toggleRouteMode }>
         <i className="fas fa-directions"></i>
         </button>

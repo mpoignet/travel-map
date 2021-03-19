@@ -123,7 +123,6 @@ class MappingClient {
     input.setAttribute('value', label)
     input.className = 'labelInput'
     input.addEventListener('input', (e) => {
-      console.debug(e)
       self.renameObject(id, e.target.value)
     })
     return input
